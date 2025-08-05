@@ -13,8 +13,8 @@ spring:
             redirect-uri: ${APP_BASE_URL}/login/oauth2/code/google
           github:
             scope:
-              - repo
-              - user
+                - read:user
+                - user:email
             redirect-uri: ${APP_BASE_URL}/login/oauth2/code/github
         provider:
           google:

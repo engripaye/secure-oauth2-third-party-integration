@@ -23,10 +23,7 @@ public class OAuth2Controller {
     }
 
     @GetMapping("/success")
-    public String handleOAuth2Success(
-            OAuth2AuthenticationToken authentication,
-            @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient
-    ) throws Exception {
+    public String handleOAuth2Success(OAuth2AuthenticationToken authentication) throws Exception {
         if (authentication == null || authentication.getPrincipal() == null) {
             return "Authentication failed: No user info received.";
         }
@@ -34,12 +31,23 @@ public class OAuth2Controller {
         String provider = authentication.getAuthorizedClientRegistrationId();
         OAuth2User principal = authentication.getPrincipal();
 
-        String userId = principal.getAttribute("email") != null ?
-                principal.getAttribute("email") :
-                principal.getAttribute("login");
+        System.out.println("OAuth2User Attributes: " + principal.getAttributes()); // 👈 Add this line
+
+        String userId = null;
+
+        if (principal.getAttribute("email") != null) {
+            userId = principal.getAttribute("email");
+        } else if (principal.getAttribute("login") != null) {
+            userId = principal.getAttribute("login");
+        } else {
+            userId = "unknown";
+        }
+
+        OAuth2AuthorizedClient authorizedClient =
+                authorizedClientService.loadAuthorizedClient(provider, authentication.getName());
 
         if (authorizedClient == null) {
-            return "Authentication failed: Could not load authorized client for provider: " + provider;
+            return "Authorized client not found for provider: " + provider;
         }
 
         String accessToken = authorizedClient.getAccessToken().getTokenValue();
