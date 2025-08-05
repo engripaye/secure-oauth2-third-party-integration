@@ -6,16 +6,12 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret:  ${GOOGLE_CLIENT_SECRET}
             scope:
               - https://www.googleapis.com/auth/drive.readonly
               - profile
               - email
             redirect-uri: ${APP_BASE_URL}/login/oauth2/code/google
           github:
-            client-id: ${GITHUB_CLIENT_ID}
-            client-secret: ${GITHUB_CLIENT_SECRET}
             scope:
               - repo
               - user
@@ -40,8 +36,11 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  config:
+    import: "optional:classpath:application-secret.yaml"
 server:
   port: 8081
   servlet:
     context-path: /
+
 

@@ -1,7 +1,9 @@
 package dev.engripaye.secure_oauth2_third_party_integration.controller;
 
 import dev.engripaye.secure_oauth2_third_party_integration.service.TokenService;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,22 +14,39 @@ import org.springframework.web.bind.annotation.RestController;
 public class OAuth2Controller {
 
     private final TokenService tokenService;
+    private final OAuth2AuthorizedClientService authorizedClientService;
 
-    public OAuth2Controller(TokenService tokenService) {
+    public OAuth2Controller(TokenService tokenService, OAuth2AuthorizedClientService authorizedClientService) {
         this.tokenService = tokenService;
+        this.authorizedClientService = authorizedClientService;
     }
 
     @GetMapping("/success")
-    public String handleOAuth2Success(@AuthenticationPrincipal OAuth2User principal) throws Exception{
-        String provider = principal.getAttribute("provider");
-        String userId = principal.getAttribute("email") != null ? principal.getAttribute("email") : principal.getAttribute("login");
-        String accessToken = principal.getAttribute("access_token");
-        String refreshToken = principal.getAttribute("refresh_token");
-        Long expiresIn = principal.getAttribute("expires_in");
-        String scope = principal.getAttribute("scope");
+    public String handleOAuth2Success(OAuth2AuthenticationToken authentication) throws Exception {
+        String provider = authentication.getAuthorizedClientRegistrationId(); // e.g. "google" or "github"
+        OAuth2User principal = authentication.getPrincipal();
+
+        String userId = principal.getAttribute("email") != null ?
+                principal.getAttribute("email") :
+                principal.getAttribute("login");
+
+        OAuth2AuthorizedClient authorizedClient =
+                authorizedClientService.loadAuthorizedClient(
+                        provider,
+                        authentication.getName()
+                );
+
+        String accessToken = authorizedClient.getAccessToken().getTokenValue();
+        String refreshToken = authorizedClient.getRefreshToken() != null ?
+                authorizedClient.getRefreshToken().getTokenValue() : null;
+
+        Long expiresIn = authorizedClient.getAccessToken().getExpiresAt() != null ?
+                authorizedClient.getAccessToken().getExpiresAt().toEpochMilli() : null;
+
+        String scope = String.join(" ", authorizedClient.getAccessToken().getScopes());
 
         tokenService.saveToken(userId, provider, accessToken, refreshToken, expiresIn, scope);
-        return "Successfully connected to " + provider + "!";
 
+        return "Successfully connected to " + provider + "!";
     }
 }
