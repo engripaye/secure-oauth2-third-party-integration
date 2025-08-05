@@ -18,10 +18,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")  // 👈 points to our custom login page
-                        .defaultSuccessUrl("/integration/success", true))
-                .logout(logout -> logout
-                        .logoutSuccessUrl("/").permitAll());
-
+                        .defaultSuccessUrl("/integration/success", true)
+                .failureHandler((request, response, exception) -> {
+                    exception.printStackTrace(); // Log the root cause
+                    response.sendRedirect("/login?error=" + exception.getMessage()); // Optional
+                }));
         return http.build();
     }
     }
