@@ -3,6 +3,7 @@ package dev.engripaye.secure_oauth2_third_party_integration.controller;
 import dev.engripaye.secure_oauth2_third_party_integration.service.TokenService;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +23,10 @@ public class OAuth2Controller {
     }
 
     @GetMapping("/success")
-    public String handleOAuth2Success(OAuth2AuthenticationToken authentication) throws Exception {
+    public String handleOAuth2Success(
+            OAuth2AuthenticationToken authentication,
+            @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient
+    ) throws Exception {
         if (authentication == null || authentication.getPrincipal() == null) {
             return "Authentication failed: No user info received.";
         }
@@ -33,12 +37,6 @@ public class OAuth2Controller {
         String userId = principal.getAttribute("email") != null ?
                 principal.getAttribute("email") :
                 principal.getAttribute("login");
-
-        OAuth2AuthorizedClient authorizedClient =
-                authorizedClientService.loadAuthorizedClient(
-                        provider,
-                        authentication.getName()
-                );
 
         if (authorizedClient == null) {
             return "Authentication failed: Could not load authorized client for provider: " + provider;
