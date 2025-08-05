@@ -20,6 +20,8 @@ class SecureOauth2ThirdPartyIntegrationApplicationTests {
 	public void testLoginPage() throws Exception {
 		mockMvc.perform(get("/login"))
 				.andExpect(status().isOk());
+
+
 	}
 
 
