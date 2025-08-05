@@ -14,13 +14,14 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "login", "/oauth2/**").permitAll()
+                        .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**").permitAll()
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login")
+                        .loginPage("/login")  // 👈 points to our custom login page
                         .defaultSuccessUrl("/integration/success", true))
                 .logout(logout -> logout
                         .logoutSuccessUrl("/").permitAll());
+
         return http.build();
     }
-}
+    }
