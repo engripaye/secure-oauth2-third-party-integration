@@ -32,5 +32,5 @@ build/
 ### VS Code ###
 .vscode/
 
-#ignore application-secret.yaml or application-secret.yaml anywhere in the project
+# Ignore application-secret.yaml or application-secret.yaml anywhere in the project
 src/main/resources/application-secret.yaml
