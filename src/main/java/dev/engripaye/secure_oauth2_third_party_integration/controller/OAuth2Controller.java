@@ -40,6 +40,10 @@ public class OAuth2Controller {
                         authentication.getName()
                 );
 
+        if (authorizedClient == null) {
+            return "Authentication failed: Could not load authorized client for provider: " + provider;
+        }
+
         String accessToken = authorizedClient.getAccessToken().getTokenValue();
         String refreshToken = authorizedClient.getRefreshToken() != null ?
                 authorizedClient.getRefreshToken().getTokenValue() : null;
