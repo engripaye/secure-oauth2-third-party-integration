@@ -23,7 +23,11 @@ public class OAuth2Controller {
 
     @GetMapping("/success")
     public String handleOAuth2Success(OAuth2AuthenticationToken authentication) throws Exception {
-        String provider = authentication.getAuthorizedClientRegistrationId(); // e.g. "google" or "github"
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return "Authentication failed: No user info received.";
+        }
+
+        String provider = authentication.getAuthorizedClientRegistrationId();
         OAuth2User principal = authentication.getPrincipal();
 
         String userId = principal.getAttribute("email") != null ?
@@ -49,4 +53,5 @@ public class OAuth2Controller {
 
         return "Successfully connected to " + provider + "!";
     }
+
 }
